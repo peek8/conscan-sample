@@ -89,14 +89,21 @@ jobs:
             mkdir -p $ReportDir
             chmod 777 $ReportDir
 
+            TAG=$(basename "$IMG" | cut -d: -f2)
+            ReportDir="reports/$NAME"
+            mkdir -p $ReportDir
+            chmod 777 $ReportDir
+
             echo "🔍 Scanning $IMG ..."
             docker run --rm \
               -v "$HOME/.docker/config.json":/.docker/config.json \
+              -v "$(pwd)/$ReportDir:/reports" \
               -v "$(pwd)/$ReportDir:/reports" \
               -v "$(pwd)/cache:/.cache" \
               ghcr.io/peek8/conscan \
               scan "$IMG" \
               --format html \
+              --output "/reports/${TAG}.html"
               --output "/reports/${TAG}.html"
           done
           ls -l reports/
