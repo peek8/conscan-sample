@@ -2,8 +2,8 @@ name: Build and Scan Multiple Images
 
 on:
   push:
-    branches:
-      - 'main'
+    #branches:
+    # - 'main'
     tags:
       - 'v*'
   pull_request:
@@ -139,12 +139,19 @@ jobs:
       - name: Inject report links into index.html
         working-directory: ./gh-pages
         run: |
-          npm install nunjucks
-          mkdir -p reports # first time create dir
+          # add old and new report in reports dir
+          mkdir -p reports
+          mkdir -p ../conscan-reports
           
           cp -r $GITHUB_WORKSPACE/reports/* reports/
+          cp -r ../conscan-reports/* reports/
+
+          npm install nunjucks
           node update-report-index.js
-          mv reports ../conscan-reports
+
+          mkdir -p ../conscan-reports
+          cp -rp reports/* ../conscan-reports
+          rm -rf reports 
 
       - name: Commit updated HTML
         run: |
