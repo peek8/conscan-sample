@@ -110,6 +110,11 @@ jobs:
     
   update-index:
     runs-on: ubuntu-latest
+    permissions:
+      # for pushing/tagging
+      contents: write
+      # for pushing container images
+      packages: write
     needs: scan
     steps:
       - name: Checkout repo
