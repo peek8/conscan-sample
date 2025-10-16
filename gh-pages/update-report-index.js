@@ -21,7 +21,7 @@ const images = fs.readdirSync(reportsRoot)
                   }))
       }));
 
-const env = nunjucks.configure("reports", {
+const env = nunjucks.configure(".", {
     autoescape: true,
     noCache: true // Set to false in production for better performance
 });
