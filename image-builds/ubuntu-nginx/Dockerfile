@@ -1,6 +1,6 @@
-FROM alpine:3.22
+FROM ubuntu:noble
 
-RUN apk update && apk add nginx
+RUN apt update && apt install -y nginx
 
 # Provide a non-root user (distroless provides user 65532)
 USER 65532:65532

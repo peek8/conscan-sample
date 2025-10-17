@@ -38,7 +38,7 @@ jobs:
           REPO="ghcr.io/${{github.repository}}"
           IMAGES=""
 
-          for service in alpine-secret node-nodemon ubuntu-cpufetch; do
+          for service in alpine-nginx alpine-secret alpine-yq busybox-yq node-nodemon ubuntu-cpufetch ubuntu-nginx; do
             DIR="image-builds/${service}"
             if [ -f "${DIR}/Dockerfile" ]; then
               IMAGE="${REPO}/${service}:${VERSION}"
