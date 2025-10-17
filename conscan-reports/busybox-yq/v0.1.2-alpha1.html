@@ -1,0 +1,2281 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>ConScan Scan Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+             
+            color: #333;
+            line-height: 1.4;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+             
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1em;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .image-info {
+             
+            background: linear-gradient(135deg, #5c84e9, #9798de, #a588e4);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+             
+            backdrop-filter: blur(10px);
+            color: white;
+            
+        }
+
+        .image-info h2 {
+             
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .info-item {
+            background: linear-gradient(135deg, #7078e0, #806ce2, #5b4ddd);
+             
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #2b092d;
+            transition: transform 0.3s ease;
+        }
+
+        .info-item:hover {
+            transform: translateX(5px);
+        }
+
+        .info-label {
+            font-weight: bold;
+             
+        }
+
+        .info-value {
+             
+            margin-top: 5px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            margin-bottom: 15px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            color: white;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .badge-critical, .badge-fatal { background: #ff1744; color: white; box-shadow: 0 4px 15px rgba(255, 23, 68, 0.4); }
+        .badge-high, .badge-warn { background: #ff6d00; color: white; box-shadow: 0 4px 15px rgba(255, 109, 0, 0.4); }
+        .badge-medium, .badge-info { background: #ffc400; color: #333; box-shadow: 0 4px 15px rgba(255, 196, 0, 0.4); }
+        .badge-low, .badge-skip { background: #00e676; color: white; box-shadow: 0 4px 15px rgba(0, 230, 118, 0.4); }
+        .badge-info, .badge-unknown, .badge-ignore, .badge-pass  { background: #30a2e9; color: white; box-shadow: 0 4px 15px rgb(146 216 242 / 40%); }
+        .badge-negligible  { background: #606f76; color: white; box-shadow: 0 4px 15px rgb(174 194 209 / 40%);}
+
+        .section-content {
+            padding: 10px;
+        }
+
+        .vulnerability-item, .package-item, .secret-item, .violation-item {
+            border: 2px solid rgba(255, 105, 180, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .vulnerability-item:hover, .package-item:hover, .secret-item:hover, .violation-item:hover {
+            box-shadow: 0 8px 25px rgba(255, 105, 180, 0.3);
+            border-color: rgba(255, 105, 180, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .vuln-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .vuln-title {
+            font-weight: 600;
+            color: #1f2937;
+            flex: 1;
+            font-size: 0.9em;
+        }
+
+        .vuln-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            margin-top: 5px;
+        }
+        
+        .package-details {
+            display: grid;
+            grid-template-columns: 20% 40% 40%;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+            font-size: 0.85em;
+        }
+
+        .secret-item .detail-item.location-item {
+             
+            gap: 3px;
+        }
+
+        .secret-item .detail-item.location-item .detail-value {
+             
+            
+            color: #48297f;
+            word-break: break-all;
+        }
+
+        .secret-item .detail-item.pattern-item {
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .secret-item .detail-item.pattern-item .detail-value {
+            font-family: monospace;
+            background: #f3f4f6;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            color: #6b7280;
+            word-break: break-all;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #ff1744;
+            min-width: 80px;
+        }
+
+        .detail-value {
+            color: #2d3748;
+        }
+
+        .package-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .package-name {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 0.9em;
+        }
+
+        .package-version {
+            color: #2979ff;
+            font-weight: 600;
+            font-size: 0.85em;
+            text-shadow: 0 1px 2px rgba(41, 121, 255, 0.2);
+        }
+
+        .secret-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .secret-type {
+            font-weight: 600;
+            color: #ff1744;
+            font-size: 0.9em;
+            text-shadow: 0 1px 2px rgba(255, 23, 68, 0.2);
+        }
+
+        .secret-location {
+            color: #6b7280;
+            font-family: monospace;
+            background: #f3f4f6;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+
+        .violation-header {
+            margin-bottom: 5px;
+        }
+
+        .violation-rule {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 3px;
+            font-size: 0.9em;
+        }
+
+        .violation-description {
+            color: #6b7280;
+            margin-bottom: 5px;
+            font-size: 0.85em;
+        }
+
+         
+        .storage-metrics {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 6px;
+            border-left: 3px solid #2563eb;
+        }
+
+        .metric-label {
+            font-weight: 600;
+            color: #1f2937;
+            min-width: 100px;
+            font-size: 0.85em;
+        }
+
+        .metric-value {
+            color: #4b5563;
+            font-weight: 500;
+            font-size: 0.85em;
+        }
+
+        .metric-value.efficiency {
+            color: #00e676;
+            font-weight: 600;
+        }
+
+        .metric-value.wasted {
+            color: #ff6d00;
+            font-weight: 600;
+        }
+
+        .metric-value.user-wasted {
+            color: #ffc400;
+            font-weight: 600;
+        }
+
+        .files-table {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 60px 100px 1fr;
+            gap: 10px;
+            background: linear-gradient(135deg, #8b54b5, #d855a9, #d69669);;
+            color: white;
+            padding: 10px;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 60px 100px 1fr;
+            gap: 10px;
+            padding: 8px 10px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.8em;
+            transition: background-color 0.3s ease;
+        }
+
+        .table-row:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .col-count {
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .col-space {
+            text-align: right;
+            font-weight: 600;
+            color: #ff6d00;
+        }
+
+        .col-path {
+            font-family: monospace;
+            color: #4b5563;
+            word-break: break-all;
+        }
+
+        .results-list {
+            margin-bottom: 15px;
+        }
+
+        .result-item {
+            display: flex;
+            gap: 10px;
+            padding: 6px 10px;
+            margin-bottom: 5px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .result-status {
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .result-item.pass .result-status {
+            background: #00e676;
+            color: white;
+        }
+
+        .result-item.skip .result-status {
+            background: #ffc400;
+            color: #333;
+        }
+
+        .result-item.fail .result-status {
+            background: #ff1744;
+            color: white;
+        }
+
+        .result-name {
+            color: #4b5563;
+            flex: 1;
+        }
+
+        .results-summary {
+            background: rgba(0, 230, 118, 0.1);
+            border: 1px solid #00e676;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 0.9em;
+            color: #1f2937;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .summary-card.critical-card {
+            background: linear-gradient(135deg, #ff1744, #ff5722);
+            color: white;
+        }
+
+        .summary-card.high-card {
+            background: linear-gradient(135deg, #ff6d00, #ff9800);
+            color: white;
+        }
+
+        .summary-card.medium-card {
+            background: linear-gradient(135deg, #ffc400, #ffeb3b);
+            color: #333;
+        }
+
+        .summary-card.exposed-secrets {
+            background-color: #ec4899;
+            color: white;
+        }
+
+        .summary-card.cis-violation{
+            background-color: #e3177c;
+            color: white;
+        }
+        
+        .summary-card.storage-analysis{
+            background-color: #12b3e2;
+            color: white;
+        }
+
+        
+
+        .summary-card.low-card {
+            background: linear-gradient(135deg, #00e676, #4caf50);
+            color: white;
+        }
+
+        .summary-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .summary-label {
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .summary-card.critical-card .summary-number,
+        .summary-card.critical-card .summary-label { color: white; }
+        .summary-card.high-card .summary-number,
+        .summary-card.high-card .summary-label { color: white; }
+        .summary-card.medium-card .summary-number,
+        .summary-card.medium-card .summary-label { color: #333; }
+        .summary-card.exposed-secrets .summary-label { color: white; }
+        .summary-card.cis-violation .summary-label { color: white; }
+        .summary-card.storage-analysis .summary-label { color: white; }
+        .summary-card.low-card .summary-number,
+        .summary-card.low-card .summary-label { color: white; }
+
+        .scrollable-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid rgba(255, 105, 180, 0.3);
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 245, 245, 0.9));
+            padding: 10px;
+        }
+
+        .scrollable-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollable-container::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 3px;
+        }
+
+        .scrollable-container::-webkit-scrollbar-thumb {
+            background: #6b7280;
+            border-radius: 3px;
+        }
+
+        .scrollable-container::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 5px; }
+            .header { padding: 15px; }
+            .header h1 { font-size: 1.5em; }
+            .vuln-header { flex-direction: column; align-items: flex-start; }
+            .summary-cards { grid-template-columns: repeat(2, 1fr); }
+            .info-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ConScan Image Scan Dashboard</h1>
+            <p>ConScan, A tool from Peek8.io, Scans everything in an Image !</p>
+        </div>
+
+        <div class="image-info">
+            <h2>Image Information</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Image Name</div>
+                    <div class="info-value">ghcr.io/peek8/conscan-sample/busybox-yq:v0.1.2-alpha1</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Base OS</div>
+                    <div class="info-value">- -</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Architecture</div>
+                    <div class="info-value">linux/amd64</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Size</div>
+                    <div class="info-value">13 MB</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Scan Date</div>
+                    <div class="info-value">2025-10-17 10:01:48 UTC</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Scanner Version</div>
+                    <div class="info-value">ConScan v0.01.1</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-cards">
+            
+            <div class="summary-card critical-card">
+                <div class="summary-number">3</div>
+                <div class="summary-label">Critical Vulnerabilities</div>
+            </div>
+            <div class="summary-card high-card">
+                <div class="summary-number">14</div>
+                <div class="summary-label">High Vulnerabilities</div>
+            </div>
+            
+            <div class="summary-card exposed-secrets">
+                <div class="summary-number">0</div>
+                <div class="summary-label">Exposed Secrets</div>
+            </div>
+            
+            <div class="summary-card low-card">
+                <div class="summary-number">24</div>
+                <div class="summary-label">Installed Packages</div>
+            </div>
+            
+            
+            <div class="summary-card cis-violation">
+                <div class="summary-number">3</div>
+                <div class="summary-label">CIS Violations</div>
+            </div>
+            
+            
+            <div class="summary-card storage-analysis">
+                <div class="summary-number">100.00%</div>
+                <div class="summary-label">Storage Efficiency</div>
+            </div>
+            
+        </div>
+
+        
+         
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Package Vulnerabilities</div>
+                <div class="badge badge-critical">38 Total</div>
+            </div>
+            <div class="section-content">
+                <div class="scrollable-container">
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2025-22871">CVE-2025-22871:</a> The net/http package improperly accepts a bare LF as a line terminator in chunked data chunk-size...</div>
+                            <div class="badge badge-critical">Critical</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.23.8</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">9.10</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-24790">CVE-2024-24790:</a> The various Is methods (IsPrivate, IsLoopback, etc) did not work as expected for IPv4-mapped IPv6...</div>
+                            <div class="badge badge-critical">Critical</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.21.11</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">9.80</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-39320">CVE-2023-39320:</a> The go.mod toolchain directive, introduced in Go 1.21, can be leveraged to execute scripts and bi...</div>
+                            <div class="badge badge-critical">Critical</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.21.1</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">9.80</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-39325">CVE-2023-39325:</a> A malicious HTTP/2 client which rapidly creates requests and immediately resets them can cause ex...</div>
+                            <div class="badge badge-high">High</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.20.10</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">7.50</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2025-47907">CVE-2025-47907:</a> Cancelling a query (e.g. by cancelling the context passed to one of the query methods) during a c...</div>
+                            <div class="badge badge-high">High</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.23.12</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">7.00</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-39322">CVE-2023-39322:</a> QUIC connections do not set an upper bound on the amount of data buffered when reading post-hands...</div>
+                            <div class="badge badge-high">High</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.21.1</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">7.50</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-34158">CVE-2024-34158:</a> Calling Parse on a &#34;// &#43;build&#34; build tag line with deeply nested expressions can cause a panic du...</div>
+                            <div class="badge badge-high">High</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.22.7</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">7.50</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-24784">CVE-2024-24784:</a> The ParseAddressList function incorrectly handles comments (text within parentheses) within displ...</div>
+                            <div class="badge badge-high">High</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.21.8</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">7.50</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-39323">CVE-2023-39323:</a> Line directives (&#34;//line&#34;) can be used to bypass the restrictions on &#34;//go:cgo_&#34; directives, allo...</div>
+                            <div class="badge badge-high">High</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.20.9</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">8.10</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://github.com/advisories/GHSA-4374-p667-p6c8">GHSA-4374-p667-p6c8:</a> A malicious HTTP/2 client which rapidly creates requests and immediately resets them can cause ex...</div>
+                            <div class="badge badge-high">High</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">golang.org/x/net</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">v0.14.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">0.17.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">7.50</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-24791">CVE-2024-24791:</a> The net/http HTTP/1.1 client mishandled the case where a server responds to a request with an &#34;Ex...</div>
+                            <div class="badge badge-high">High</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.21.12</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">7.50</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-45288">CVE-2023-45288:</a> An attacker may cause an HTTP/2 endpoint to read arbitrary amounts of header data by sending an e...</div>
+                            <div class="badge badge-high">High</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.21.9</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">7.50</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-45285">CVE-2023-45285:</a> Using go get to fetch a module with the &#34;.git&#34; suffix may unexpectedly fallback to the insecure &#34;...</div>
+                            <div class="badge badge-high">High</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.20.12</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">7.50</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-44487">CVE-2023-44487:</a> The HTTP/2 protocol allows a denial of service (server resource consumption) because request canc...</div>
+                            <div class="badge badge-high">High</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.20.10</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">7.50</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-34156">CVE-2024-34156:</a> Calling Decoder.Decode on a message which contains deeply nested structures can cause a panic due...</div>
+                            <div class="badge badge-high">High</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.22.7</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">7.50</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2025-4674">CVE-2025-4674:</a> The go command may execute unexpected commands when operating in untrusted VCS repositories. This...</div>
+                            <div class="badge badge-high">High</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.23.11</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">8.60</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-39321">CVE-2023-39321:</a> Processing an incomplete post-handshake message for a QUIC connection can cause a panic.</div>
+                            <div class="badge badge-high">High</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.21.1</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">7.50</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://github.com/advisories/GHSA-qppj-fm5r-hxr3">GHSA-qppj-fm5r-hxr3:</a> The HTTP/2 protocol allows a denial of service (server resource consumption) because request canc...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">golang.org/x/net</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">v0.14.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">0.17.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">5.30</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-24785">CVE-2024-24785:</a> If errors returned from MarshalJSON methods contain user controlled data, they may be used to bre...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.21.8</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">5.40</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-24787">CVE-2024-24787:</a> On Darwin, building a Go module which contains CGO can trigger arbitrary code execution when usin...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.21.10</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">6.40</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-45290">CVE-2023-45290:</a> When parsing a multipart form (either explicitly with Request.ParseMultipartForm or implicitly wi...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.21.8</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">6.50</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-45341">CVE-2024-45341:</a> A certificate with a URI which has a IPv6 address with a zone ID may incorrectly satisfy a URI na...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.22.11</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">6.10</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-24789">CVE-2024-24789:</a> The archive/zip package&#39;s handling of certain types of invalid zip files differs from the behavio...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.21.11</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">5.50</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://github.com/advisories/GHSA-vvgc-356p-c3xw">GHSA-vvgc-356p-c3xw:</a> The tokenizer incorrectly interprets tags with unquoted attribute values that end with a solidus...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">golang.org/x/net</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">v0.14.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">0.38.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">Unknown</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-24783">CVE-2024-24783:</a> Verifying a certificate chain which contains a certificate with an unknown public key algorithm w...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.21.8</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">5.90</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-45289">CVE-2023-45289:</a> When following an HTTP redirect to a domain which is not a subdomain match or exact match of the...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.21.8</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">4.30</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-39319">CVE-2023-39319:</a> The html/template package does not apply the proper rules for handling occurrences of &#34;&lt;script&#34;,...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.20.8</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">6.10</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-45336">CVE-2024-45336:</a> The HTTP client drops sensitive headers after following a cross-domain redirect. For example, a r...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.22.11</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">6.10</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2025-47906">CVE-2025-47906:</a> If the PATH environment variable contains paths which are executables (rather than just directori...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.23.12</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">6.50</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2025-22866">CVE-2025-22866:</a> Due to the usage of a variable time instruction in the assembly implementation of an internal fun...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.22.12</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">4.00</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-39318">CVE-2023-39318:</a> The html/template package does not properly handle HTML-like &#34;&#34; comment tokens, nor hashbang &#34;#!&#34;...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.20.8</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">6.10</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-34155">CVE-2024-34155:</a> Calling any of the Parse functions on Go source code which contains deeply nested literals can ca...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.22.7</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">4.30</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2025-4673">CVE-2025-4673:</a> Proxy-Authorization and Proxy-Authenticate headers persisted on cross-origin redirects potentiall...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.23.10</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">6.80</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://github.com/advisories/GHSA-qxp5-gwg8-xv66">GHSA-qxp5-gwg8-xv66:</a> Matching of hosts against proxy patterns can improperly treat an IPv6 zone ID as a hostname compo...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">golang.org/x/net</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">v0.14.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">0.36.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">4.40</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://github.com/advisories/GHSA-4v7x-pqxf-cx7m">GHSA-4v7x-pqxf-cx7m:</a> An attacker may cause an HTTP/2 endpoint to read arbitrary amounts of header data by sending an e...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">golang.org/x/net</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">v0.14.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">0.23.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">5.30</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-39326">CVE-2023-39326:</a> A malicious HTTP sender can use chunk extensions to cause a receiver reading from a request or re...</div>
+                            <div class="badge badge-medium">Medium</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">stdlib</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">go1.21.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value">1.20.12</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">5.30</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2025-46394">CVE-2025-46394:</a> In tar in BusyBox through 1.37.0, a TAR archive can have filenames hidden from a listing through...</div>
+                            <div class="badge badge-low">Low</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">busybox</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">1.37.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value"></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">3.30</span>
+                            </div>
+                        </div>
+                    </div>
+                          
+                    <div class="vulnerability-item">
+                        <div class="vuln-header">
+                            <div class="vuln-title"><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-58251">CVE-2024-58251:</a> In netstat in BusyBox through 1.37.0, local users can launch of network application with an argv[...</div>
+                            <div class="badge badge-low">Low</div>
+                        </div>
+                        <div class="vuln-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Package:</span>
+                                <span class="detail-value">busybox</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Installed Version:</span>
+                                <span class="detail-value">1.37.0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Fixed Version:</span>
+                                <span class="detail-value"></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">CVSS Score:</span>
+                                <span class="detail-value">2.50</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+
+        
+        
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Exposed Secrets</div>
+                <div class="badge badge-high">0 Found</div>
+            </div>
+            <div class="section-content">
+                <div class="scrollable-container">
+                    
+                
+                </div>
+            </div>
+        </div>
+
+        
+        
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">CIS Benchmark Violations</div>
+                <div class="badge badge-high">3 Issues</div>
+            </div>
+            <div class="section-content">
+                <div class="scrollable-container">
+                    
+                    <div class="violation-item">
+                        <div class="violation-header">
+                            <div class="violation-rule">CIS-DI-0001: Create a user for the container</div>
+                            <div class="badge badge-warn">WARN</div>
+                        </div>
+                        <div class="violation-description">
+                            Last user should not be root
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="violation-item">
+                        <div class="violation-header">
+                            <div class="violation-rule">CIS-DI-0005: Enable Content trust for Docker</div>
+                            <div class="badge badge-info">INFO</div>
+                        </div>
+                        <div class="violation-description">
+                            export DOCKER_CONTENT_TRUST=1 before docker pull/build
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="violation-item">
+                        <div class="violation-header">
+                            <div class="violation-rule">CIS-DI-0006: Add HEALTHCHECK instruction to the container image</div>
+                            <div class="badge badge-info">INFO</div>
+                        </div>
+                        <div class="violation-description">
+                            not found HEALTHCHECK statement
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+
+        
+        
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Storage Analysis</div>
+                <div class="badge badge-medium">0 B Wasted</div>
+            </div>
+            <div class="section-content">
+                <div class="scrollable-container">
+                    <div class="storage-metrics">
+                        <h3 style="color: #1f2937; margin-bottom: 15px; font-size: 1.1em;">Analysis Summary</h3>
+                        
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <span class="metric-label">Efficiency:</span>
+                                <span class="metric-value efficiency">100.00%</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Wasted Bytes:</span>
+                                <span class="metric-value wasted">0 B</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">User Wasted Percent:</span>
+                                <span class="metric-value user-wasted">0.00%</span>
+                            </div>
+                        </div>
+
+                        <h4 style="color: #1f2937; margin: 20px 0 10px 0; font-size: 1em;">Inefficient Files:</h4>
+                        
+                        <div class="files-table">
+                            <div class="table-header">
+                                <div class="">Count</div>
+                                <div class="">Wasted Space</div>
+                                <div class="">File Path</div>
+                            </div>
+                            
+                            
+                        </div>
+
+                        <h4 style="color: #1f2937; margin: 20px 0 10px 0; font-size: 1em;">Results:</h4>
+                        
+                        <div class="results-list">
+                            <div class="result-item pass">
+                                <span class="result-status">PASS</span>
+                                <span class="result-name">highestUserWastedPercent</span>
+                            </div>
+                            <div class="result-item skip">
+                                <span class="result-status">SKIP</span>
+                                <span class="result-name">highestWastedBytes: rule disabled</span>
+                            </div>
+                            <div class="result-item pass">
+                                <span class="result-status">PASS</span>
+                                <span class="result-name">lowestEfficiency</span>
+                            </div>
+                        </div>
+
+                        <div class="results-summary">
+                            <strong>Result: PASS</strong> [Total:3] [Passed:2] [Failed:0] [Warn:0] [Skipped:1]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        
+        
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Installed Packages</div>
+                <div class="badge badge-info">24 Total</div>
+            </div>
+            <div class="section-content">
+                <div class="scrollable-container">
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">busybox</div>
+                            <div class="package-version">1.37.0</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">ghcr.io/peek8/conscan-sample/busybox-yq</div>
+                            <div class="package-version">v0.1.2-alpha1</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/a8m/envsubst</div>
+                            <div class="package-version">v1.4.2</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/alecthomas/participle/v2</div>
+                            <div class="package-version">v2.0.0</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/dimchansky/utfbom</div>
+                            <div class="package-version">v1.1.1</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/elliotchance/orderedmap</div>
+                            <div class="package-version">v1.5.0</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/fatih/color</div>
+                            <div class="package-version">v1.15.0</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/goccy/go-json</div>
+                            <div class="package-version">v0.10.2</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/goccy/go-yaml</div>
+                            <div class="package-version">v1.11.0</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/jinzhu/copier</div>
+                            <div class="package-version">v0.3.5</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/magiconair/properties</div>
+                            <div class="package-version">v1.8.7</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/mattn/go-colorable</div>
+                            <div class="package-version">v0.1.13</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/mattn/go-isatty</div>
+                            <div class="package-version">v0.0.17</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/mikefarah/yq/v4</div>
+                            <div class="package-version">v0.0.0-20230811035314-6609ed76ecb6</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/pelletier/go-toml/v2</div>
+                            <div class="package-version">v2.0.9</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/spf13/cobra</div>
+                            <div class="package-version">v1.7.0</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">github.com/spf13/pflag</div>
+                            <div class="package-version">v1.0.5</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">golang.org/x/net</div>
+                            <div class="package-version">v0.14.0</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">golang.org/x/sys</div>
+                            <div class="package-version">v0.11.0</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">golang.org/x/text</div>
+                            <div class="package-version">v0.12.0</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">golang.org/x/xerrors</div>
+                            <div class="package-version">v0.0.0-20220609144429-65e65417b02f</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">gopkg.in/op/go-logging.v1</div>
+                            <div class="package-version">v1.0.0-20160211212156-b2cb9fa56473</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">gopkg.in/yaml.v3</div>
+                            <div class="package-version">v3.0.1</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">NOASSERTION</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                        
+                    <div class="package-item">
+                        <div class="package-header">
+                            <div class="package-name">stdlib</div>
+                            <div class="package-version">go1.21.0</div>
+                        </div>
+                        <div class="package-details">
+                            <div class="detail-item">
+                                <span class="detail-label">License:</span>
+                                <span class="detail-value">BSD-3-Clause</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Source:</span>
+                                <span class="detail-value"><a href="NOASSERTION">NOASSERTION</a></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+
+    </div>
+
+</body></html>
